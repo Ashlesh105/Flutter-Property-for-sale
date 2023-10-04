@@ -59,35 +59,30 @@ class _LoginPageState extends State<LoginPage> {
       body: SingleChildScrollView(
         scrollDirection: Axis.vertical,
         child: Stack(children: [
-          Container(
-            height: MediaQuery.of(context).size.height,
-            width: double.infinity,
-            decoration: const BoxDecoration(
-                gradient:
-                LinearGradient(colors: [Colors.red, Colors.deepPurple])),
-            child: const Padding(
-              padding: EdgeInsets.only(top: 60, left: 20),
-              child: Text(
-                'Hello Welcome\n SignIn to your account',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold),
-              ),
-            ),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+
+            children: [
+              Text('SignIn'),
+              Container(
+                width: 100,
+                height: 100,
+                alignment: Alignment.topCenter,
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                ),
+              )
+            ],
           ),
           Padding(
-            padding: const EdgeInsets.only(top: 200, left: 10, right: 10),
+            padding: const EdgeInsets.only(top: 200),
             child: Container(
-              height: 400,
+              height: MediaQuery.of(context).size.height,
               width: double.infinity,
-              decoration: const BoxDecoration(
-                  color: Colors.white,
+              decoration:  BoxDecoration(
+                  color: Colors.transparent,
                   borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(40),
-                      topRight: Radius.circular(40),
-                      bottomLeft: Radius.circular(40),
-                      bottomRight: Radius.circular(40))),
+                      topRight: Radius.circular(40))),
               child: Column(
                 children: [
                   Form(
