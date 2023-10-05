@@ -1,8 +1,8 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:property_sale/main.dart';
 
-import 'main.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -59,30 +59,33 @@ class _LoginPageState extends State<LoginPage> {
       body: SingleChildScrollView(
         scrollDirection: Axis.vertical,
         child: Stack(children: [
-          Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-
-            children: [
-              Text('SignIn'),
-              Container(
-                width: 100,
-                height: 100,
-                alignment: Alignment.topCenter,
-                decoration: BoxDecoration(
-                  color: Colors.black,
-                ),
-              )
-            ],
+          Container(
+            height: MediaQuery.of(context).size.height,
+            width: double.infinity,
+            decoration: const BoxDecoration(
+                gradient:
+                LinearGradient(colors: [Colors.blue,Colors.blueGrey])),
+            child: const Padding(
+              padding: EdgeInsets.only(top: 60, left: 20),
+              child: Text(
+                'Hello Welcome\n SignIn to your account',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold),
+              ),
+            ),
           ),
           Padding(
-            padding: const EdgeInsets.only(top: 200),
+            padding:  EdgeInsets.only(top: 200),
             child: Container(
-              height: MediaQuery.of(context).size.height,
+              height: 600,
               width: double.infinity,
-              decoration:  BoxDecoration(
-                  color: Colors.transparent,
+              decoration: const BoxDecoration(
+                  color: Colors.white,
                   borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(40))),
+                      topRight: Radius.circular(40),
+                     )),
               child: Column(
                 children: [
                   Form(
@@ -151,7 +154,7 @@ class _LoginPageState extends State<LoginPage> {
                   Container(
                     decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                            colors: [Colors.red, Colors.deepPurple]),
+                            colors: [Colors.blue, Colors.deepPurple]),
                         borderRadius: BorderRadius.circular(20)),
                     child: MaterialButton(
                       onPressed: () {
@@ -164,7 +167,7 @@ class _LoginPageState extends State<LoginPage> {
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const MyApp(),
+                                builder: (context) => Myapp(),
                               ),
                             );
                           } else {
@@ -275,7 +278,7 @@ class _SignUpPageState extends State<SignUpPage> {
             width: MediaQuery.of(context).size.width,
             decoration: const BoxDecoration(
                 gradient:
-                LinearGradient(colors: [Colors.red, Colors.deepPurple])),
+                LinearGradient(colors: [Colors.blue,Colors.blueGrey])),
             child: const Padding(
               padding: EdgeInsets.only(top: 60, left: 20),
               child: Text(
@@ -435,7 +438,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   Container(
                     decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                            colors: [Colors.red, Colors.deepPurple]),
+                            colors: [Colors.blue, Colors.deepPurple]),
                         borderRadius: BorderRadius.circular(20)),
                     child: MaterialButton(
                       onPressed: () {
