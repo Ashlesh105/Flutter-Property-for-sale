@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:property_sale/main.dart';
+import 'package:property_sale/selectionPage.dart';
 
 
 void main() {
@@ -64,7 +65,7 @@ class _LoginPageState extends State<LoginPage> {
             width: double.infinity,
             decoration: const BoxDecoration(
                 gradient:
-                LinearGradient(colors: [Colors.blue,Colors.blueGrey])),
+                LinearGradient(colors: [Colors.orange,Colors.yellow])),
             child: const Padding(
               padding: EdgeInsets.only(top: 60, left: 20),
               child: Text(
@@ -153,8 +154,7 @@ class _LoginPageState extends State<LoginPage> {
                       )),
                   Container(
                     decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                            colors: [Colors.blue, Colors.deepPurple]),
+                        gradient: LinearGradient(colors: [Colors.orange,Colors.yellow]),
                         borderRadius: BorderRadius.circular(20)),
                     child: MaterialButton(
                       onPressed: () {
@@ -167,7 +167,7 @@ class _LoginPageState extends State<LoginPage> {
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => Myapp(),
+                                builder: (context) => categories(),
                               ),
                             );
                           } else {
@@ -278,7 +278,7 @@ class _SignUpPageState extends State<SignUpPage> {
             width: MediaQuery.of(context).size.width,
             decoration: const BoxDecoration(
                 gradient:
-                LinearGradient(colors: [Colors.blue,Colors.blueGrey])),
+                LinearGradient(colors: [Colors.orange,Colors.yellow])),
             child: const Padding(
               padding: EdgeInsets.only(top: 60, left: 20),
               child: Text(
@@ -437,8 +437,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       )),
                   Container(
                     decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                            colors: [Colors.blue, Colors.deepPurple]),
+                        gradient: LinearGradient(colors: [Colors.orange,Colors.yellow]),
                         borderRadius: BorderRadius.circular(20)),
                     child: MaterialButton(
                       onPressed: () {
