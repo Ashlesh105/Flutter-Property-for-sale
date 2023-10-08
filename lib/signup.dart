@@ -1,9 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:property_sale/main.dart';
 import 'package:property_sale/selectionPage.dart';
-
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,8 +40,8 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController _userIdController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _userIdController = TextEditingController(text: "");
+  final TextEditingController _passwordController = TextEditingController(text: "");
   bool _isHidden = true;
   bool _validateUser(String userId, String password) {
     for (User user in UsersData.users) {
@@ -238,7 +236,7 @@ class _LoginPageState extends State<LoginPage> {
 }
 
 //.....................SignUp page.....................................//
-void main1() => runApp(const MaterialApp(
+void main1() => runApp( MaterialApp(
   home: SignUpPage(),
   debugShowCheckedModeBanner: false,
 ));
