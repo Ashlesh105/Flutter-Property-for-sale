@@ -34,7 +34,7 @@ class _drawerState extends State<drawer> {
             title: Text('Profile'),
             onTap: () {
               Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => myProfile()));
+                  MaterialPageRoute(builder: (context) => MyProfile()));
             },
           ),
           ListTile(

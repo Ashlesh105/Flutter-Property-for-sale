@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:property_sale/sellProperty.dart';
 
 import 'House.dart';
 
@@ -16,14 +17,16 @@ class template extends StatelessWidget {
       required this.width})
       : super(key: key);
 
+  get property => null;
+
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(top: 10, bottom: 10, right: 10, left: 10),
+      padding: const EdgeInsets.only(top: 10, bottom: 10, right: 10, left: 10),
       child: GestureDetector(
         onTap: () {
           Navigator.push(
-              context, MaterialPageRoute(builder: (context) => House()));
+              context, MaterialPageRoute(builder: (context) =>PropertyDetails(property: property)));
         },
         child: Container(
           decoration: BoxDecoration(

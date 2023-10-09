@@ -19,18 +19,33 @@ class categories extends StatefulWidget {
 class _categoriesState extends State<categories> {
   Position? _currentPosition;
   String? _currentAddress;
+  bool _locationPermissionGranted = false;
 
-  Future<Position> _getPosition() async {
-    LocationPermission permission;
-    permission = await Geolocator.checkPermission();
+  @override
+  void initState() {
+    super.initState();
+    _checkLocationPermission();
+  }
+
+  Future<void> _checkLocationPermission() async {
+    LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Location not available'),
-      ));
     }
-    return await Geolocator.getCurrentPosition();
+
+    if (permission == LocationPermission.always ||
+        permission == LocationPermission.whileInUse) {
+      _locationPermissionGranted = true;
+      await _getCurrentLocation();
+    }
+  }
+  Future<void> _getCurrentLocation() async {
+    try {
+      _currentPosition = await Geolocator.getCurrentPosition();
+      _getAddress(_currentPosition!.latitude, _currentPosition!.longitude);
+    } catch (e) {
+      print(e);
+    }
   }
 
   void _getAddress(latitude, longitude) async {
@@ -60,10 +75,16 @@ class _categoriesState extends State<categories> {
         centerTitle: true,
         elevation: 0,
         actions: [
+
          TextButton(onPressed: () async{
-           _currentAddress = (await _getPosition()) as String?;
-           _getAddress(_currentPosition!.latitude, _currentPosition!.longitude);
-         }, child: Text('Location'))
+           await _checkLocationPermission();
+           print(_currentAddress);
+         }, child:Text(
+           _locationPermissionGranted
+               ? _currentAddress ?? 'Loading...'
+               : 'Location',
+           style: TextStyle(color: Colors.deepPurple),
+         ),)
         ],
       ),
       body: SingleChildScrollView(
@@ -94,32 +115,7 @@ class _categoriesState extends State<categories> {
                     text: 'Office',
                     height: MediaQuery.of(context).size.height * 0.5,
                     width: MediaQuery.of(context).size.width),
-                Padding(
-                  padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
-                  child: Align(
-                    alignment: Alignment.bottomCenter,
-                    child: SizedBox(
-                      width: 200,
-                      height: 50,
-                      child: OutlinedButton(
-                        onPressed: () {},
-                        child: Text(
-                          'SHOW ALL',
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 20.0,
-                              fontWeight: FontWeight.w200),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          side: BorderSide(color: Colors.deepPurple),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10.0)),
-                          backgroundColor: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                )
+
               ],
             )
           ],
