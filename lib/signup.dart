@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:property_sale/selectionPage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,17 +41,47 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController _userIdController = TextEditingController(text: "");
-  final TextEditingController _passwordController = TextEditingController(text: "");
+  final TextEditingController _userIdController =
+  TextEditingController(text: "");
+  final TextEditingController _passwordController =
+  TextEditingController(text: "");
   bool _isHidden = true;
-  bool _validateUser(String userId, String password) {
-    for (User user in UsersData.users) {
-      if (user.userId == userId && user.password == password) {
-        return true; // User found and credentials match
-      }
+  Future<void> _validateUser(String userId, String password) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    String? savedUserId = prefs.getString('userId');
+    String? savedPassword = prefs.getString('password');
+
+    if (userId == savedUserId && password == savedPassword) {
+      // User found and credentials match
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Categories(),
+        ),
+      );
+    } else {
+      // Show an error message or handle failed login
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Login Failed'),
+            content: const Text(
+                'Invalid credentials. Please try again.'),
+            actions: [
+              TextButton(
+                onPressed: () =>
+                    Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
     }
-    return false; // User not found or credentials don't match
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +94,7 @@ class _LoginPageState extends State<LoginPage> {
             width: double.infinity,
             decoration: const BoxDecoration(
                 gradient:
-                LinearGradient(colors: [Colors.orange,Colors.yellow])),
+                LinearGradient(colors: [Colors.orange, Colors.yellow])),
             child: const Padding(
               padding: EdgeInsets.only(top: 60, left: 20),
               child: Text(
@@ -76,15 +107,15 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
           Padding(
-            padding:  EdgeInsets.only(top: 200),
+            padding: EdgeInsets.only(top: 200),
             child: Container(
               height: 600,
               width: double.infinity,
               decoration: const BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(40),
-                     )),
+                    topRight: Radius.circular(40),
+                  )),
               child: Column(
                 children: [
                   Form(
@@ -152,7 +183,8 @@ class _LoginPageState extends State<LoginPage> {
                       )),
                   Container(
                     decoration: BoxDecoration(
-                        gradient: LinearGradient(colors: [Colors.orange,Colors.yellow]),
+                        gradient: LinearGradient(
+                            colors: [Colors.orange, Colors.yellow]),
                         borderRadius: BorderRadius.circular(20)),
                     child: MaterialButton(
                       onPressed: () {
@@ -160,34 +192,7 @@ class _LoginPageState extends State<LoginPage> {
                           String userId = _userIdController.text;
                           String password = _passwordController.text;
 
-                          if (_validateUser(userId, password)) {
-                            // Credentials are valid, navigate to the authenticated page
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => categories(),
-                              ),
-                            );
-                          } else {
-                            // Show an error message or handle failed login
-                            showDialog(
-                              context: context,
-                              builder: (context) {
-                                return AlertDialog(
-                                  title: const Text('Login Failed'),
-                                  content: const Text(
-                                      'Invalid credentials. Please try again.'),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () =>
-                                          Navigator.of(context).pop(),
-                                      child: const Text('OK'),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          }
+                          _validateUser(userId, password);
                         }
                       },
                       child: const Text('Login'),
@@ -214,7 +219,8 @@ class _LoginPageState extends State<LoginPage> {
                                     Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                            builder: (context) => const SignUpPage()));
+                                            builder: (context) =>
+                                            const SignUpPage()));
                                   })
                           ]))
                     ],
@@ -236,7 +242,7 @@ class _LoginPageState extends State<LoginPage> {
 }
 
 //.....................SignUp page.....................................//
-void main1() => runApp( MaterialApp(
+void main1() => runApp(MaterialApp(
   home: SignUpPage(),
   debugShowCheckedModeBanner: false,
 ));
@@ -264,6 +270,12 @@ class _SignUpPageState extends State<SignUpPage> {
     });
   }
 
+  void _saveUserInformation() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('userId', _userIdController.text);
+    prefs.setString('password', _passwordController.text);
+  }
+
   bool _isHidden = true;
   @override
   Widget build(BuildContext context) {
@@ -276,7 +288,7 @@ class _SignUpPageState extends State<SignUpPage> {
             width: MediaQuery.of(context).size.width,
             decoration: const BoxDecoration(
                 gradient:
-                LinearGradient(colors: [Colors.orange,Colors.yellow])),
+                LinearGradient(colors: [Colors.orange, Colors.yellow])),
             child: const Padding(
               padding: EdgeInsets.only(top: 60, left: 20),
               child: Text(
@@ -435,7 +447,8 @@ class _SignUpPageState extends State<SignUpPage> {
                       )),
                   Container(
                     decoration: BoxDecoration(
-                        gradient: LinearGradient(colors: [Colors.orange,Colors.yellow]),
+                        gradient: LinearGradient(
+                            colors: [Colors.orange, Colors.yellow]),
                         borderRadius: BorderRadius.circular(20)),
                     child: MaterialButton(
                       onPressed: () {
@@ -445,7 +458,8 @@ class _SignUpPageState extends State<SignUpPage> {
 
                           UsersData.users
                               .add(User(userId: userId, password: password));
-
+                          // Save user information to SharedPreferences
+                          _saveUserInformation();
                           // Navigate back to the login page with the entered credentials
                           Navigator.pushReplacement(
                               context,

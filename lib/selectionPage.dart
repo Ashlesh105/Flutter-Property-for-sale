@@ -1,126 +1,201 @@
 import 'package:flutter/material.dart';
-import 'package:geocoding/geocoding.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:property_sale/Drawer.dart';
+import 'package:property_sale/helperClass.dart';
 import 'package:property_sale/widget.dart';
+import 'Drawer.dart';
+import 'property_model.dart';
 
-void main() => runApp(MaterialApp(
-      home: categories(),
-      debugShowCheckedModeBanner: false,
-    ));
-
-class categories extends StatefulWidget {
-  const categories({super.key});
+class Categories extends StatefulWidget {
+  const Categories({Key? key}) : super(key: key);
 
   @override
-  State<categories> createState() => _categoriesState();
+  _CategoriesState createState() => _CategoriesState();
 }
 
-class _categoriesState extends State<categories> {
-  Position? _currentPosition;
-  String? _currentAddress;
-  bool _locationPermissionGranted = false;
+class _CategoriesState extends State<Categories> {
+  late List<Property> properties = [];
+  bool showHouse = true;
+  bool showOffice = true;
+  bool showOther = true;
+  double minPrice = 500;
+  double maxPrice = 10000;
 
   @override
   void initState() {
     super.initState();
-    _checkLocationPermission();
+    _loadUserInformation();
   }
 
-  Future<void> _checkLocationPermission() async {
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-    }
-
-    if (permission == LocationPermission.always ||
-        permission == LocationPermission.whileInUse) {
-      _locationPermissionGranted = true;
-      await _getCurrentLocation();
-    }
-  }
-  Future<void> _getCurrentLocation() async {
-    try {
-      _currentPosition = await Geolocator.getCurrentPosition();
-      _getAddress(_currentPosition!.latitude, _currentPosition!.longitude);
-    } catch (e) {
-      print(e);
-    }
+  Future<void> _loadUserInformation() async {
+    List<Property> loadedProperties = await DatabaseHelper.instance.getProperties();
+    setState(() {
+      properties = loadedProperties;
+    }); // Update the UI with loaded data
   }
 
-  void _getAddress(latitude, longitude) async {
-    try {
-      List<Placemark> placemark = await GeocodingPlatform.instance
-          .placemarkFromCoordinates(latitude, longitude);
-      Placemark place = placemark[0];
-      setState(() {
-        _currentAddress ='${place.locality},${place.street},${place.country}';
-      });
-    } catch (e) {
-      print(e);
-    }
+  List<Property> _filterProperties() {
+    return properties.where((property) {
+      bool nameCondition = true;
+
+      if (!showHouse && property.type == 'house') {
+        nameCondition = false;
+      } else if (!showOffice && property.type == 'office') {
+        nameCondition = false;
+      } else if (!showOther && property.type == 'other') {
+        nameCondition = false;
+      }
+
+      bool priceCondition = property.minPrice >= minPrice && property.maxPrice <= maxPrice;
+
+      return nameCondition && priceCondition;
+    }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: drawer(),
+      drawer: const DrawerPage(
+        userName: '',
+        userEmail: '',
+        userPhoneNumber: '',
+        userProfileImage: null,
+      ),
       appBar: AppBar(
-        iconTheme: IconThemeData(color: Colors.black),
+        iconTheme: const IconThemeData(color: Colors.black),
         backgroundColor: Colors.white,
-        title: Text(
+        title: const Text(
           'Home',
           style: TextStyle(color: Colors.deepPurple),
         ),
         centerTitle: true,
         elevation: 0,
         actions: [
-
-         TextButton(onPressed: () async{
-           await _checkLocationPermission();
-           print(_currentAddress);
-         }, child:Text(
-           _locationPermissionGranted
-               ? _currentAddress ?? 'Loading...'
-               : 'Location',
-           style: TextStyle(color: Colors.deepPurple),
-         ),)
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              setState(() {
+                if (value == 'filters') {
+                  // Show a dialog or perform any action when the user selects "Filters"
+                  _showFilterDialog(context);
+                }
+              });
+            },
+            itemBuilder: (BuildContext context) {
+              return [
+                const PopupMenuItem<String>(
+                  value: 'filters',
+                  child: Text('Filters'),
+                ),
+              ];
+            },
+          ),
         ],
       ),
       body: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            SizedBox(
+            const SizedBox(
               height: 10,
             ),
-            Text(
-              'Categories',
-              style: TextStyle(color: Colors.black, fontSize: 25),
-            ),
             Column(
-              children: [
-                template(
-                    imageUrl: 'assets/home-image.jpg',
-                    text: 'House',
-                    height: MediaQuery.of(context).size.height * 0.5,
-                    width: MediaQuery.of(context).size.width),
-                template(
-                    imageUrl: 'assets/Appartment.jpg',
-                    text: 'Appartment',
-                    height: MediaQuery.of(context).size.height * 0.5,
-                    width: MediaQuery.of(context).size.width),
-                template(
-                    imageUrl: 'assets/office.jpg',
-                    text: 'Office',
-                    height: MediaQuery.of(context).size.height * 0.5,
-                    width: MediaQuery.of(context).size.width),
-
-              ],
+              children: _filterProperties().isEmpty
+                  ? [const Center(child: Text('No Info'))]
+                  : _filterProperties().map((property) {
+                return Template(
+                  imageUrl: property.imageUrl,
+                  text:
+                  '${property.type.toUpperCase()}\nMin: \$${property.minPrice}\nMax: \$${property.maxPrice}',
+                  height:
+                  MediaQuery.of(context).size.height * 0.5,
+                  width: MediaQuery.of(context).size.width,
+                );
+              }).toList(),
             )
           ],
         ),
       ),
+    );
+  }
+
+  // Show a filter dialog
+  void _showFilterDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Filter Options'),
+          content: Column(
+            children: [
+              CheckboxListTile(
+                title: const Text('House'),
+                value: showHouse,
+                onChanged: (bool? value) {
+                  setState(() {
+                    showHouse = value!;
+                  });
+                },
+              ),
+              CheckboxListTile(
+                title: const Text('Office'),
+                value: showOffice,
+                onChanged: (bool? value) {
+                  setState(() {
+                    showOffice = value!;
+                  });
+                },
+              ),
+              CheckboxListTile(
+                title: const Text('Other'),
+                value: showOther,
+                onChanged: (bool? value) {
+                  setState(() {
+                    showOther = value!;
+                  });
+                },
+              ),
+              const Divider(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Price Range:'),
+                  Text('\$${minPrice.toInt()} - \$${maxPrice.toInt()}'),
+                ],
+              ),
+              Slider(
+                value: minPrice,
+                onChanged: (double value) {
+                  setState(() {
+                    minPrice = value;
+                  });
+                },
+                min: 0,
+                max: 10000,
+                divisions: 100,
+                label: '$minPrice',
+              ),
+              Slider(
+                value: maxPrice,
+                onChanged: (double value) {
+                  setState(() {
+                    maxPrice = value;
+                  });
+                },
+                min: 0,
+                max: 10000,
+                divisions: 100,
+                label: '$maxPrice',
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Apply'),
+            ),
+          ],
+        );
+      },
     );
   }
 }

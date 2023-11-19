@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'Drawer.dart';
+import 'User_model_class.dart';
+import 'helperClass.dart';
 
 void main() => runApp(MaterialApp(
   home: MyProfile(),
@@ -19,7 +24,7 @@ class _MyProfileState extends State<MyProfile> {
   TextEditingController _nameController = TextEditingController();
   TextEditingController _emailController = TextEditingController();
   TextEditingController _phoneNumberController = TextEditingController();
-
+  late int userId;
   bool _isEditing = false;
 
   Future getImageFromGallery() async {
@@ -30,20 +35,54 @@ class _MyProfileState extends State<MyProfile> {
     });
   }
 
-  void _toggleEdit() {
+  Future<void> _toggleEdit() async {
     setState(() {
       _isEditing = !_isEditing;
       if (!_isEditing) {
         // Save changes when done editing
         // You can save these values in a database or wherever you prefer.
         // For simplicity, we are just displaying them here.
-        _nameController.text;
-        _emailController.text;
-        _phoneNumberController.text;
+        _updateUserData();
       }
     });
   }
 
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController();
+    _emailController = TextEditingController();
+    _phoneNumberController = TextEditingController();
+    _isEditing = true;
+    _loadUserData();
+  }
+  Future<void> _loadUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    userId = prefs.getInt('userId') ?? 0;
+
+    // Retrieve user data from SQLite
+    User? user = await DatabaseHelper.instance.getUser(userId);
+
+    if (user != null) {
+      setState(() {
+        _nameController.text = user.name;
+        _emailController.text = user.email;
+        _phoneNumberController.text = user.phoneNumber;
+        _selectedImage = File(user.profileImage);
+      });
+    }
+  }
+
+  Future<void> _updateUserData() async {
+    // Save user data to SQLite
+    await DatabaseHelper.instance.updateUser(User(
+      id: userId,
+      name: _nameController.text,
+      email: _emailController.text,
+      phoneNumber: _phoneNumberController.text,
+      profileImage: _selectedImage?.path ?? '',
+    ));
+  }
   @override
   void dispose() {
     _nameController.dispose();
@@ -125,9 +164,25 @@ class _MyProfileState extends State<MyProfile> {
               ),
             ),
             ElevatedButton(
-              onPressed: _toggleEdit,
-              child: Text(_isEditing ? 'Save' : 'Edit'),
+              onPressed: () async {
+                await _toggleEdit(); // Save changes before navigating
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DrawerPage(
+                      userName: _nameController.text,
+                      userEmail: _emailController.text,
+                      userPhoneNumber: _phoneNumberController.text,
+                      userProfileImage: _selectedImage,
+                    ),
+                  ),
+                );
+              },
+              child: Text('Save'),
             ),
+
+
           ],
         ),
       ),

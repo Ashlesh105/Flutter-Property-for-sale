@@ -1,40 +1,26 @@
 import 'dart:io';
-
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:property_sale/helperClass.dart'; // Import your database helper
+import 'package:property_sale/selectionPage.dart';
+import 'property_model.dart'; // Import your Property model
 
-void main() => runApp(MaterialApp(home: sellProperty()));
-
-class Property {
-  String type;
-  int minPrice;
-  int maxPrice;
-  String imageUrl;
-
-  Property({
-    required this.type,
-    required this.minPrice,
-    required this.maxPrice,
-    required this.imageUrl,
-  });
-}
-
-class sellProperty extends StatefulWidget {
-  const sellProperty({Key? key});
+class SellProperty extends StatefulWidget {
+  const SellProperty({Key? key}) : super(key: key);
 
   @override
-  State<sellProperty> createState() => _sellProperty();
+  State<SellProperty> createState() => _SellPropertyState();
 }
 
-class _sellProperty extends State<sellProperty> {
+class _SellPropertyState extends State<SellProperty> {
   final TextEditingController typeController = TextEditingController();
   final TextEditingController minPriceController = TextEditingController();
   final TextEditingController maxPriceController = TextEditingController();
   File? _image;
 
   Future getImageFromGallery() async {
-    final imageFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    final imageFile =
+    await ImagePicker().pickImage(source: ImageSource.gallery);
     if (imageFile == null) return;
     setState(() {
       _image = File(imageFile.path);
@@ -42,7 +28,7 @@ class _sellProperty extends State<sellProperty> {
     });
   }
 
-  void _addProperty() {
+  void _addProperty() async {
     final type = typeController.text;
     final minPrice = int.tryParse(minPriceController.text) ?? 0;
     final maxPrice = int.tryParse(maxPriceController.text) ?? 0;
@@ -55,10 +41,12 @@ class _sellProperty extends State<sellProperty> {
       imageUrl: imageUrl,
     );
 
+    await DatabaseHelper.instance.insertProperty(property.toMap());
+
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => PropertyDetails(property: property),
+        builder: (context) => Categories(),
       ),
     );
   }
@@ -92,88 +80,11 @@ class _sellProperty extends State<sellProperty> {
               onPressed: getImageFromGallery,
               child: Text('Select Image'),
             ),
-           SizedBox(height: 10,),
+            SizedBox(height: 10),
             ElevatedButton(
               onPressed: _addProperty,
               child: Text('Add Property'),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class PropertyDetails extends StatelessWidget {
-  final Property property;
-
-  PropertyDetails({required this.property});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(top: 10, bottom: 10, right: 10, left: 10),
-      child: Container(
-        decoration: BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(20.0)),
-            boxShadow: [
-              BoxShadow(color: Colors.black12, spreadRadius: 2.0),
-            ]),
-          height: MediaQuery.of(context).size.height * 0.5,
-          width: MediaQuery.of(context).size.width,
-        child: Stack(
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20.0)
-              ),
-              child: Text('Image here')
-              // ClipRRect(
-              //   borderRadius: BorderRadius.circular(20.0),
-              //   child: Image.File(
-              //     imageUrl,
-              //     width: MediaQuery.of(context).size.width,
-              //     height: MediaQuery.of(context).size.width,
-              //     fit: BoxFit.fill,
-              //   ),
-              // ),
-            ),
-            Align(
-                alignment: Alignment.bottomCenter,
-                child: Container(
-                    height: 200,
-                    width: MediaQuery.of(context).size.width,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(20.0),
-                          bottomRight: Radius.circular(20.0)),
-                      color: Colors.white,
-                    ),
-                    padding: EdgeInsets.symmetric(vertical: 8.0),
-                    child: Column(children: [
-                      Text(
-                        ' ${property.type}',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            fontSize: 20.0, fontWeight: FontWeight.bold,color: Colors.black),
-                      ),
-                      Text(
-                        'Minimum Price: \$${property.minPrice}',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            fontSize: 20.0, fontWeight: FontWeight.bold,color: Colors.black),
-                      ),
-                      Text(
-                        'Maximum Price: \$${property.maxPrice}',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            fontSize: 20.0, fontWeight: FontWeight.bold,color: Colors.black),
-                      ),
-
-                    ],)
-
-                )),
-            // IconButton(onPressed: (){}, icon: Icon(Icons.favorite_border_rounded))
           ],
         ),
       ),
