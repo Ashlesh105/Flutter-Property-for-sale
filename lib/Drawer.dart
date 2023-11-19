@@ -6,14 +6,11 @@ import 'package:property_sale/signup.dart';
 import 'Profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-void main() => runApp(MaterialApp(home: DrawerPage(userName: '', userEmail: '', userPhoneNumber: '', userProfileImage: null,)));
-
 class DrawerPage extends StatefulWidget {
   final String userName;
   final String userEmail;
   final String userPhoneNumber;
   final File? userProfileImage;
-
 
   const DrawerPage({
     Key? key,
@@ -21,7 +18,6 @@ class DrawerPage extends StatefulWidget {
     required this.userEmail,
     required this.userPhoneNumber,
     required this.userProfileImage,
-
   }) : super(key: key);
 
   @override
@@ -66,9 +62,16 @@ class _DrawerPageState extends State<DrawerPage> {
           ListTile(
             leading: const Icon(Icons.person),
             title: const Text('Profile'),
-            onTap: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => MyProfile()));
+            onTap: () async {
+              // Navigate to the profile page and wait for it to return
+              await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => MyProfile()),
+              );
+
+              // Reload the drawer with updated user information
+              _getCurrentUserId();
+              setState(() {});
             },
           ),
           ListTile(

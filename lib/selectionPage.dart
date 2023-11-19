@@ -4,6 +4,9 @@ import 'package:property_sale/widget.dart';
 import 'Drawer.dart';
 import 'property_model.dart';
 
+void main(){
+  runApp(MaterialApp(home:Categories(),debugShowCheckedModeBanner: false,));
+}
 class Categories extends StatefulWidget {
   const Categories({Key? key}) : super(key: key);
 
@@ -53,7 +56,7 @@ class _CategoriesState extends State<Categories> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: const DrawerPage(
+      drawer:  DrawerPage(
         userName: '',
         userEmail: '',
         userPhoneNumber: '',

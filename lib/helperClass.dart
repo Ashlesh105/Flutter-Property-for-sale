@@ -50,7 +50,7 @@ class DatabaseHelper {
         $columnId INTEGER PRIMARY KEY,
         $columnName TEXT NOT NULL,
         $columnEmail TEXT NOT NULL,
-        $columnPhoneNumber TEXT NOT NULL
+        $columnPhoneNumber TEXT NOT NULL,
         $columnProfileImage TEXT NOT NULL
       )
     ''');

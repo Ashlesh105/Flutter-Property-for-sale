@@ -24,29 +24,8 @@ class _MyProfileState extends State<MyProfile> {
   TextEditingController _nameController = TextEditingController();
   TextEditingController _emailController = TextEditingController();
   TextEditingController _phoneNumberController = TextEditingController();
-  late int userId;
+   int userId =0;
   bool _isEditing = false;
-
-  Future getImageFromGallery() async {
-    final imageFile = await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (imageFile == null) return;
-    setState(() {
-      _selectedImage = File(imageFile.path);
-    });
-  }
-
-  Future<void> _toggleEdit() async {
-    setState(() {
-      _isEditing = !_isEditing;
-      if (!_isEditing) {
-        // Save changes when done editing
-        // You can save these values in a database or wherever you prefer.
-        // For simplicity, we are just displaying them here.
-        _updateUserData();
-      }
-    });
-  }
-
   @override
   void initState() {
     super.initState();
@@ -58,7 +37,12 @@ class _MyProfileState extends State<MyProfile> {
   }
   Future<void> _loadUserData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    userId = prefs.getInt('userId') ?? 0;
+    String? userIdString = prefs.getString('userId');
+
+    // Check if userIdString is not null and can be parsed as an integer
+    if (userIdString != null) {
+      userId = int.tryParse(userIdString) ?? 0;
+    }
 
     // Retrieve user data from SQLite
     User? user = await DatabaseHelper.instance.getUser(userId);
@@ -73,6 +57,22 @@ class _MyProfileState extends State<MyProfile> {
     }
   }
 
+  Future<void> _toggleEdit() async {
+    print('in toggle edit');
+    setState(() {
+      _isEditing = !_isEditing;
+      if (!_isEditing) {
+        // Save changes when done editing
+        // You can save these values in a database or wherever you prefer.
+        // For simplicity, we are just displaying them here.
+        _updateUserData().then((_) {
+          _loadUserData(); // Reload user data after updating
+        });
+        Navigator.pop(context);
+      }
+    });
+  }
+
   Future<void> _updateUserData() async {
     // Save user data to SQLite
     await DatabaseHelper.instance.updateUser(User(
@@ -81,8 +81,25 @@ class _MyProfileState extends State<MyProfile> {
       email: _emailController.text,
       phoneNumber: _phoneNumberController.text,
       profileImage: _selectedImage?.path ?? '',
+
     ));
+    print('User data updated in the database:');
+    print('Name: ${_nameController.text}');
+    print('Email: ${_emailController.text}');
+    print('Phone Number: ${_phoneNumberController.text}');
+    print('Profile Image Path: ${_selectedImage?.path ?? ''}');
   }
+
+  Future getImageFromGallery() async {
+    final imageFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (imageFile == null) return;
+    setState(() {
+      _selectedImage = File(imageFile.path);
+    });
+  }
+
+
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -166,18 +183,7 @@ class _MyProfileState extends State<MyProfile> {
             ElevatedButton(
               onPressed: () async {
                 await _toggleEdit(); // Save changes before navigating
-
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => DrawerPage(
-                      userName: _nameController.text,
-                      userEmail: _emailController.text,
-                      userPhoneNumber: _phoneNumberController.text,
-                      userProfileImage: _selectedImage,
-                    ),
-                  ),
-                );
+                print('saved');
               },
               child: Text('Save'),
             ),
